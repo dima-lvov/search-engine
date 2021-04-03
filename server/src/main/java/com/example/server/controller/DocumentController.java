@@ -1,23 +1,34 @@
 package com.example.server.controller;
 
+import com.example.server.service.DocumentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 
-@RequestMapping("/documents")
+@RequiredArgsConstructor
 @RestController
+@RequestMapping("/documents")
 public class DocumentController {
 
-    @PostMapping(path = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createDocument(@RequestBody DocumentDto document) {
+    private final DocumentService documentService;
 
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void createDocument(@RequestBody @Valid CreateDocumentRequestDto document) {
+        documentService.saveDocument(document.getDocumentKey(), document.getContent());
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/{documentKey}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetDocumentResponseDto> getDocumentByKey(@PathVariable String documentKey) {
+        return documentService.getDocumentByKey(documentKey)
+                .map(GetDocumentResponseDto::new)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 }

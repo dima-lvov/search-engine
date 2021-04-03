@@ -1,30 +1,35 @@
 package com.example.server.service;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import com.example.server.controller.DocumentAlreadyExistsException;
+import com.example.server.repository.DocumentRepository;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class DocumentService {
 
-    private static final Map<String, String> DOCUMENT_STORAGE = new ConcurrentHashMap<>();
+    private final DocumentRepository documentRepository;
+
+    private final Cache<String, Set<String>> cache = CacheBuilder.newBuilder().build();
 
     public void saveDocument(String key, String content) {
-        if (DOCUMENT_STORAGE.putIfAbsent(key, content) != null) {
-            throw new IllegalArgumentException(String.format("Document with key %s already exists", key));
+        if (!documentRepository.saveNewDocument(key, content)) {
+            throw new DocumentAlreadyExistsException(String.format("Document with key: [%s] already exists.", key));
         }
     }
 
-    public Optional<String> getDocument(String key) {
-        return Optional.ofNullable(DOCUMENT_STORAGE.get(key));
+    public Optional<String> getDocumentByKey(String key) {
+        return documentRepository.getDocumentByKey(key);
     }
 
-    public Set<String> search(Set<String> tokens) {
+    public Set<String> search(Set<String> tokens) throws ExecutionException {
         return Collections.emptySet();
     }
 }
