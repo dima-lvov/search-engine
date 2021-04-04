@@ -1,35 +1,15 @@
 package com.example.server.service;
 
-import com.example.server.controller.DocumentAlreadyExistsException;
-import com.example.server.repository.DocumentRepository;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import java.util.Optional;
+import java.util.Set;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+public interface DocumentService {
 
-@Component
-@RequiredArgsConstructor
-public class DocumentService {
+    void saveNewDocument(String key, String content);
 
-    private final DocumentRepository documentRepository;
+    Optional<String> getDocumentByKey(String key);
 
-    private final Cache<String, Set<String>> cache = CacheBuilder.newBuilder().build();
+    Set<String> findDocumentsContainingAllTokens(Set<String> tokens);
 
-    public void saveDocument(String key, String content) {
-        if (!documentRepository.saveNewDocument(key, content)) {
-            throw new DocumentAlreadyExistsException(String.format("Document with key: [%s] already exists.", key));
-        }
-    }
-
-    public Optional<String> getDocumentByKey(String key) {
-        return documentRepository.getDocumentByKey(key);
-    }
-
-    public Set<String> search(Set<String> tokens) throws ExecutionException {
-        return Collections.emptySet();
-    }
+    void clearAllDocuments();
 }

@@ -1,4 +1,4 @@
-package com.example.server.controller;
+package com.example.server.api;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

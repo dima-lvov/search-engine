@@ -1,6 +1,6 @@
 package com.example.server;
 
-import com.example.server.repository.DocumentRepository;
+import com.example.server.service.DocumentServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.blankString;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -22,7 +22,7 @@ class ServerApplicationTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private DocumentRepository documentRepository;
+    private DocumentServiceImpl documentService;
 
     @Test
     void shouldRespondWithCreatedOnCreateNewDocument() throws Exception {
@@ -36,7 +36,7 @@ class ServerApplicationTests {
 
     @Test
     void shouldRespondWithConflictOnCreateDocumentWithExistingKey() throws Exception {
-        documentRepository.saveNewDocument("TestDocumentKey", "word1 word2");
+        documentService.saveNewDocument("TestDocumentKey", "word1 word2");
         String documentWithExistingKey = "{\"documentKey\":\"TestDocumentKey\", \"content\":\"whatever\"}";
 
         mockMvc.perform(post("/documents")
@@ -71,7 +71,7 @@ class ServerApplicationTests {
 
     @Test
     void shouldRespondWithOkOnGetDocumentByKey() throws Exception {
-        documentRepository.saveNewDocument("TestDocumentKey", "word1 word2");
+        documentService.saveNewDocument("TestDocumentKey", "word1 word2");
         mockMvc.perform(get("/documents/{documentKey}", "TestDocumentKey"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value("word1 word2"));
@@ -84,9 +84,21 @@ class ServerApplicationTests {
                 .andExpect(content().string(blankString()));
     }
 
+    @Test
+    void shouldRespondWithOkOnGetDocumentByTokens() throws Exception {
+        documentService.saveNewDocument("TestDocumentKey1", "word1 word2 word3");
+        documentService.saveNewDocument("TestDocumentKey2", "word1 word2");
+        documentService.saveNewDocument("TestDocumentKey3", "word1");
+        mockMvc.perform(get("/documents")
+                .param("token", "word1", "word2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.documentKeys")
+                        .value(containsInAnyOrder("TestDocumentKey1","TestDocumentKey2")));
+    }
+
     @AfterEach
     void tearDown() {
-        documentRepository.clearStorage();
+        documentService.clearAllDocuments();
     }
 
 }
