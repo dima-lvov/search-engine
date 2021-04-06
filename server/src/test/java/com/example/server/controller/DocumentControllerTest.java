@@ -1,28 +1,39 @@
-package com.example.server;
+package com.example.server.controller;
 
-import com.example.server.service.DocumentServiceImpl;
-import org.junit.jupiter.api.AfterEach;
+import com.example.server.service.DocumentAlreadyExistsException;
+import com.example.server.service.DocumentService;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankString;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ServerApplicationTests {
+class DocumentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private DocumentServiceImpl documentService;
+    @MockBean
+    private DocumentService documentService;
 
     @Test
     void shouldRespondWithCreatedOnCreateNewDocument() throws Exception {
@@ -36,15 +47,15 @@ class ServerApplicationTests {
 
     @Test
     void shouldRespondWithConflictOnCreateDocumentWithExistingKey() throws Exception {
-        documentService.saveNewDocument("TestDocumentKey", "word1 word2");
-        String documentWithExistingKey = "{\"documentKey\":\"TestDocumentKey\", \"content\":\"whatever\"}";
+        doThrow(new DocumentAlreadyExistsException("Key"))
+                .when(documentService).createNewDocument(eq("Key"), any());
 
         mockMvc.perform(post("/documents")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(documentWithExistingKey))
+                .content("{\"documentKey\":\"Key\", \"content\":\"word1 word2\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value("Document with key: [TestDocumentKey] already exists."));
+                        .value("Document with key: [Key] already exists."));
     }
 
     @Test
@@ -71,34 +82,31 @@ class ServerApplicationTests {
 
     @Test
     void shouldRespondWithOkOnGetDocumentByKey() throws Exception {
-        documentService.saveNewDocument("TestDocumentKey", "word1 word2");
-        mockMvc.perform(get("/documents/{documentKey}", "TestDocumentKey"))
+        when(documentService.getDocumentByKey("Key")).thenReturn(Optional.of("word1 word2"));
+
+        mockMvc.perform(get("/documents/{documentKey}", "Key"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value("word1 word2"));
     }
 
     @Test
     void shouldRespondWithNotFoundOnGetNotExistingDocument() throws Exception {
-        mockMvc.perform(get("/documents/{documentKey}", "TestDocumentKey"))
+        when(documentService.getDocumentByKey("Key")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/documents/{documentKey}", "Key"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(blankString()));
     }
 
     @Test
     void shouldRespondWithOkOnGetDocumentByTokens() throws Exception {
-        documentService.saveNewDocument("TestDocumentKey1", "word1 word2 word3");
-        documentService.saveNewDocument("TestDocumentKey2", "word1 word2");
-        documentService.saveNewDocument("TestDocumentKey3", "word1");
+        when(documentService.findDocumentsContainingAllTokens(any())).thenReturn(Set.of("Key1", "Key2"));
+
         mockMvc.perform(get("/documents")
                 .param("token", "word1", "word2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.documentKeys")
-                        .value(containsInAnyOrder("TestDocumentKey1","TestDocumentKey2")));
-    }
-
-    @AfterEach
-    void tearDown() {
-        documentService.clearAllDocuments();
+                        .value(containsInAnyOrder("Key1", "Key2")));
     }
 
 }

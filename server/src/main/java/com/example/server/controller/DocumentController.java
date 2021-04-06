@@ -4,7 +4,6 @@ import com.example.server.api.CreateDocumentRequestDto;
 import com.example.server.api.GetDocumentResponseDto;
 import com.example.server.api.SearchResponseDto;
 import com.example.server.service.DocumentService;
-import com.example.server.service.DocumentServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +23,7 @@ public class DocumentController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createDocument(@RequestBody @Valid CreateDocumentRequestDto document) {
-        documentService.saveNewDocument(document.getDocumentKey(), document.getContent());
+        documentService.createNewDocument(document.getDocumentKey(), document.getContent());
     }
 
     @ResponseStatus(HttpStatus.OK)

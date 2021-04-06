@@ -1,33 +1,36 @@
 package com.example.server.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
+import com.example.server.repository.ConcurrentDocumentStorage;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @Component
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    private final Map<String, String> documents = new ConcurrentHashMap<>();
+    private final ConcurrentDocumentStorage documents;
 
     @Override
-    public void saveNewDocument(String key, String content) {
-        String valueBefore = documents.putIfAbsent(key, content);
+    public void createNewDocument(String documentKey, String content) {
+        List<String> valueBefore = documents.putIfAbsent(documentKey, List.of(StringUtils.split(content, " ")));
         if (valueBefore != null) {
-            throw new DocumentAlreadyExistsException(key);
+            throw new DocumentAlreadyExistsException(documentKey);
         }
     }
 
     @Override
     public Optional<String> getDocumentByKey(String key) {
-        return Optional.ofNullable(documents.get(key));
+        return Optional.ofNullable(documents.get(key))
+                .map(tokens -> String.join(" ", tokens));
     }
 
     @Override
@@ -38,26 +41,8 @@ public class DocumentServiceImpl implements DocumentService {
                 .collect(Collectors.toSet());
     }
 
-    @Override
-    public void clearAllDocuments() {
-        documents.clear();
-    }
-
-    protected Predicate<Map.Entry<String, String>> containsAllOf(Set<String> tokens) {
-        Set<Pattern> patterns = compilePatterns(tokens);
-        return entry -> patterns.stream()
-                .allMatch(pattern -> pattern.matcher(entry.getValue()).find());
-    }
-
-    private Set<Pattern> compilePatterns(Set<String> tokens) {
-        return tokens.stream()
-                .map(this::toWordRegex)
-                .map(Pattern::compile)
-                .collect(Collectors.toSet());
-    }
-
-    private String toWordRegex(String word) {
-        return "(^|\\s)" + word + "($|\\s)";
+    private Predicate<Map.Entry<String, List<String>>> containsAllOf(Set<String> tokens) {
+        return entry -> entry.getValue().containsAll(tokens);
     }
 
 }
