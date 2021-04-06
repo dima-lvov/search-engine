@@ -2,7 +2,6 @@ package com.example.server.service;
 
 import com.example.server.repository.DocumentStorage;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,17 +79,22 @@ class DocumentServiceTest {
 
     static Stream<FindDocumentTestCase> findDocumentTestCases() {
         return Stream.of(
-                new FindDocumentTestCase("Empty document storage, 1 search token, no document keys found")
+                new FindDocumentTestCase("Empty document storage, 1 search token, no document keys expected")
                         .forDocuments(Collections.emptyMap())
                         .searchedByTokens(Set.of("abc"))
                         .expectedResult(Collections.emptySet()),
 
-                new FindDocumentTestCase("1 document with single token, 1 search token, 1 key found")
+                new FindDocumentTestCase("1 document with no matching tokens, 1 search token, no document keys expected")
+                        .forDocuments(Map.of("key1", List.of("Abc", "ABC", "abcd", "dabc")))
+                        .searchedByTokens(Set.of("abc"))
+                        .expectedResult(Collections.emptySet()),
+
+                new FindDocumentTestCase("1 document with single token, 1 search token, 1 key expected")
                         .forDocuments(Map.of("key1", List.of("abc")))
                         .searchedByTokens(Set.of("abc"))
                         .expectedResult(Set.of("key1")),
 
-                new FindDocumentTestCase("3 documents in storage, empty search tokens, all document keys found")
+                new FindDocumentTestCase("3 documents in storage, empty search tokens, all document keys expected")
                         .forDocuments(Map.of(
                                 "key1", List.of("Abc", "|?@#!", "1Qwrt", "abc"),
                                 "key2", List.of("Abc", "|?@#!", "1Qwrt"),
@@ -98,13 +102,22 @@ class DocumentServiceTest {
                         .searchedByTokens(Collections.emptySet())
                         .expectedResult(Set.of("key1", "key2", "key3")),
 
-                new FindDocumentTestCase("3 documents in storage, 1 search token, 2 document keys found")
+                new FindDocumentTestCase("Multiple documents in storage, 1 search token, 2 document keys expected")
                         .forDocuments(Map.of(
                                 "key1", List.of("Abc", "|?@#!", "1Qwrt", "abc"),
                                 "key2", List.of("Abc", "|?@#!", "1Qwrt"),
                                 "key3", List.of("abc")))
                         .searchedByTokens(Set.of("abc"))
-                        .expectedResult(Set.of("key1", "key3"))
+                        .expectedResult(Set.of("key1", "key3")),
+
+                new FindDocumentTestCase("Multiple documents in storage, 3 search tokens, 2 document keys expected")
+                        .forDocuments(Map.of(
+                                "key1", List.of("Abc", "|?@#!", "1Qwrt", "1Qwrt", "abc"),
+                                "key2", List.of("Abc", "|?@#!", "1Qwrt"),
+                                "key3", List.of("abc", "|?@#!", "1Qwrt"),
+                                "key4", List.of("Abc", "|?@#!")))
+                        .searchedByTokens(Set.of("Abc", "|?@#!", "1Qwrt"))
+                        .expectedResult(Set.of("key1", "key2"))
         );
     }
 
