@@ -1,4 +1,4 @@
-package com.example.server.repository;
+package com.example.search.server.repository;
 
 import java.util.List;
 import java.util.Map;

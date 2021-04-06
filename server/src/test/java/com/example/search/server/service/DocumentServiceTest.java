@@ -1,14 +1,12 @@
-package com.example.server.service;
+package com.example.search.server.service;
 
-import com.example.server.repository.DocumentStorage;
+import com.example.search.server.repository.DocumentStorage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.validation.ConstraintViolationException;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -130,9 +128,7 @@ class DocumentServiceTest {
         documentStorage.clear();
     }
 
-    @Setter
     @Accessors(fluent = true)
-    @RequiredArgsConstructor
     static class FindDocumentTestCase {
 
         final String caseDescription;
@@ -140,9 +136,28 @@ class DocumentServiceTest {
         Set<String> searchedByTokens;
         Set<String> expectedResult;
 
+        public FindDocumentTestCase(String caseDescription) {
+            this.caseDescription = caseDescription;
+        }
+
         @Override
         public String toString() {
             return caseDescription;
+        }
+
+        public FindDocumentTestCase forDocuments(Map<String, List<String>> forDocuments) {
+            this.forDocuments = forDocuments;
+            return this;
+        }
+
+        public FindDocumentTestCase searchedByTokens(Set<String> searchedByTokens) {
+            this.searchedByTokens = searchedByTokens;
+            return this;
+        }
+
+        public FindDocumentTestCase expectedResult(Set<String> expectedResult) {
+            this.expectedResult = expectedResult;
+            return this;
         }
     }
 }

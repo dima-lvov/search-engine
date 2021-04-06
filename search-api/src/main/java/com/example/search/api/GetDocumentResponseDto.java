@@ -1,4 +1,4 @@
-package com.example.server.api;
+package com.example.search.api;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

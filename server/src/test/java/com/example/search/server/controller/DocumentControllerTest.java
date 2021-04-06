@@ -1,10 +1,11 @@
-package com.example.server.controller;
+package com.example.search.server.controller;
 
-import com.example.server.service.DocumentAlreadyExistsException;
-import com.example.server.service.DocumentService;
+import com.example.search.server.service.DocumentAlreadyExistsException;
+import com.example.search.server.service.DocumentService;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,8 +17,6 @@ import static org.hamcrest.Matchers.blankString;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,7 +46,7 @@ class DocumentControllerTest {
 
     @Test
     void shouldRespondWithConflictOnCreateDocumentWithExistingKey() throws Exception {
-        doThrow(new DocumentAlreadyExistsException("Key"))
+        Mockito.doThrow(new DocumentAlreadyExistsException("Key"))
                 .when(documentService).createNewDocument(eq("Key"), any());
 
         mockMvc.perform(post("/documents")

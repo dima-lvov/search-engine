@@ -1,23 +1,25 @@
-package com.example.server.service;
+package com.example.search.server.service;
 
-import com.example.server.repository.ConcurrentDocumentStorage;
+import com.example.search.server.repository.ConcurrentDocumentStorage;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @Component
-@RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
     private final ConcurrentDocumentStorage documents;
+
+    public DocumentServiceImpl(ConcurrentDocumentStorage documents) {
+        this.documents = documents;
+    }
 
     @Override
     public void createNewDocument(String documentKey, String content) {

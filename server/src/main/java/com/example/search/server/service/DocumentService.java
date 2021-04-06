@@ -1,4 +1,4 @@
-package com.example.server.service;
+package com.example.search.server.service;
 
 import java.util.Optional;
 import java.util.Set;

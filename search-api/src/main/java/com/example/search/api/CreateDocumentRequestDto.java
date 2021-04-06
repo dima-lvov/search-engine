@@ -1,4 +1,4 @@
-package com.example.server.api;
+package com.example.search.api;
 
 import javax.validation.constraints.NotEmpty;
 import lombok.Getter;

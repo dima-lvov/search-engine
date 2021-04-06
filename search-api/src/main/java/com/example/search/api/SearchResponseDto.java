@@ -1,9 +1,8 @@
-package com.example.server.api;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+package com.example.search.api;
 
 import java.util.Set;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor

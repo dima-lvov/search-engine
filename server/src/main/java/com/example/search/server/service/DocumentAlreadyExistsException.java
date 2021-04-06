@@ -1,4 +1,4 @@
-package com.example.server.service;
+package com.example.search.server.service;
 
 /**
  * Thrown to indicate an attempt to create an already existing document.
