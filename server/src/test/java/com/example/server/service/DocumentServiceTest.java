@@ -1,14 +1,16 @@
 package com.example.server.service;
 
 import com.example.server.repository.DocumentStorage;
-import com.example.server.service.DocumentServiceTest.FindDocumentTestData.FindDocumentTestDataBuilder;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.validation.ConstraintViolationException;
-import lombok.Builder;
-import lombok.Singular;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +19,6 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static com.example.server.service.DocumentServiceTest.FindDocumentTestData.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -68,12 +69,43 @@ class DocumentServiceTest {
         assertThat(documentService.getDocumentByKey("otherKey")).isEmpty();
     }
 
-    @MethodSource("findDocumentTestData")
+    @MethodSource("findDocumentTestCases")
     @ParameterizedTest
-    void findDocumentsContainingAllTokens(FindDocumentTestData testData) {
-        assertThat(documentService.findDocumentsContainingAllTokens(testData.documents.keySet()))
+    void findDocumentsContainingAllTokens(FindDocumentTestCase testData) {
+        documentStorage.putAll(testData.forDocuments);
+        assertThat(documentService.findDocumentsContainingAllTokens(testData.searchedByTokens))
                 .containsExactlyInAnyOrderElementsOf(testData.expectedResult);
 
+    }
+
+    static Stream<FindDocumentTestCase> findDocumentTestCases() {
+        return Stream.of(
+                new FindDocumentTestCase("Empty document storage, 1 search token, no document keys found")
+                        .forDocuments(Collections.emptyMap())
+                        .searchedByTokens(Set.of("abc"))
+                        .expectedResult(Collections.emptySet()),
+
+                new FindDocumentTestCase("1 document with single token, 1 search token, 1 key found")
+                        .forDocuments(Map.of("key1", List.of("abc")))
+                        .searchedByTokens(Set.of("abc"))
+                        .expectedResult(Set.of("key1")),
+
+                new FindDocumentTestCase("3 documents in storage, empty search tokens, all document keys found")
+                        .forDocuments(Map.of(
+                                "key1", List.of("Abc", "|?@#!", "1Qwrt", "abc"),
+                                "key2", List.of("Abc", "|?@#!", "1Qwrt"),
+                                "key3", List.of("abc")))
+                        .searchedByTokens(Collections.emptySet())
+                        .expectedResult(Set.of("key1", "key2", "key3")),
+
+                new FindDocumentTestCase("3 documents in storage, 1 search token, 2 document keys found")
+                        .forDocuments(Map.of(
+                                "key1", List.of("Abc", "|?@#!", "1Qwrt", "abc"),
+                                "key2", List.of("Abc", "|?@#!", "1Qwrt"),
+                                "key3", List.of("abc")))
+                        .searchedByTokens(Set.of("abc"))
+                        .expectedResult(Set.of("key1", "key3"))
+        );
     }
 
     @AfterEach
@@ -81,23 +113,19 @@ class DocumentServiceTest {
         documentStorage.clear();
     }
 
-    static Stream<FindDocumentTestData> findDocumentTestData() {
-        return Stream.of(
-                builder()
-                        .document("key1", List.of("Abc", "|?@#!", "1Qwrt", "abc"))
-                        .document("key2", List.of("Abc", "|?@#!", "1Qwrt"))
-                        .document("key3", List.of("abc"))
-                        .searchByTokens(Set.of("abc"))
-                        .expectedResult(Set.of("key1", "key3"))
-        ).map(FindDocumentTestDataBuilder::build);
-    }
+    @Setter
+    @Accessors(fluent = true)
+    @RequiredArgsConstructor
+    static class FindDocumentTestCase {
 
-    @Builder
-    static class FindDocumentTestData {
+        final String caseDescription;
+        Map<String, List<String>> forDocuments;
+        Set<String> searchedByTokens;
+        Set<String> expectedResult;
 
-        @Singular
-        final Map<String, List<String>> documents;
-        final Set<String> searchByTokens;
-        final Set<String> expectedResult;
+        @Override
+        public String toString() {
+            return caseDescription;
+        }
     }
 }
