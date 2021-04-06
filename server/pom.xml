@@ -17,9 +17,24 @@
     <java.version>11</java.version>
     <apache.commons.version>3.12.0</apache.commons.version>
     <lombok.version>1.18.18</lombok.version>
+    <!-- TODO move to client lib-->
+    <retrofit.version>2.9.0</retrofit.version>
   </properties>
 
   <dependencies>
+
+    <!-- TODO move to client lib -->
+    <!--    <dependency> -->
+    <!--      <groupId>com.squareup.retrofit2</groupId>-->
+    <!--      <artifactId>converter-jackson</artifactId>-->
+    <!--      <version>${retrofit.version}</version>-->
+    <!--    </dependency>-->
+    <!--    <dependency>-->
+    <!--      <groupId>com.squareup.retrofit2</groupId>-->
+    <!--      <artifactId>retrofit</artifactId>-->
+    <!--      <version>${retrofit.version}</version>-->
+    <!--    </dependency>-->
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -47,6 +62,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId></groupId>
+      <artifactId></artifactId>
     </dependency>
 
   </dependencies>
