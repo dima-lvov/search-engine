@@ -43,6 +43,8 @@ class DocumentServiceTest {
         assertThatThrownBy(() -> documentService.createNewDocument(key, "any content"))
                 .isInstanceOf(ConstraintViolationException.class)
                 .hasMessage("createNewDocument.documentKey: must not be empty");
+
+        assertThat(documentStorage).isEmpty();
     }
 
     @NullAndEmptySource
@@ -51,6 +53,8 @@ class DocumentServiceTest {
         assertThatThrownBy(() -> documentService.createNewDocument("someKey", content))
                 .isInstanceOf(ConstraintViolationException.class)
                 .hasMessage("createNewDocument.content: must not be empty");
+
+        assertThat(documentStorage).isEmpty();
     }
 
     @Test
