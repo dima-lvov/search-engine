@@ -8,11 +8,11 @@
     <version>2.4.4</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
-  <groupId>com.example</groupId>
+  <groupId>com.example.search</groupId>
   <artifactId>server</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>server</name>
-  <description>Rest server for search engine</description>
+  <description>Server exposing search engine REST API</description>
 
   <properties>
     <java.version>11</java.version>

@@ -36,7 +36,7 @@ public class DocumentController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public SearchResponseDto getDocumentsByTokens(@RequestParam("token") Set<String> tokens) {
+    public SearchResponseDto getDocumentsByTokens(@RequestParam(value = "token") Set<String> tokens) {
         return new SearchResponseDto(documentService.findDocumentsContainingAllTokens(tokens));
     }
 

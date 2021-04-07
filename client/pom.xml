@@ -8,14 +8,17 @@
     <version>2.4.4</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
-  <groupId>com.example</groupId>
+  <groupId>com.example.search</groupId>
   <artifactId>client</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>search-engine :: client</name>
+  <name>client</name>
   <description>Hardcoded client to call Search Server REST API</description>
+
   <properties>
-    <retrofit.version>2.9.0</retrofit.version>
+    <java.version>11</java.version>
+    <retrofit.version>2.7.2</retrofit.version>
   </properties>
+
   <dependencies>
     <dependency>
       <artifactId>search-api</artifactId>
@@ -33,4 +36,16 @@
       <version>${retrofit.version}</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <mainClass>com.example.search.client.HardcodedClientApplication</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
