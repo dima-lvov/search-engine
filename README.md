@@ -1,4 +1,4 @@
-#Search Engine App
+# Search Engine App
 Consists of 3 Maven modules:
 
 * search-api - DTOs used by the client and server.
