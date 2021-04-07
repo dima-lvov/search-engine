@@ -73,6 +73,13 @@ public class HardcodedClientApplication {
         System.out.println("Response Code: " + searchResponseNotExistingKey.code());
         System.out.println("Content: " + searchResponseNotExistingKey.body().getDocumentKeys().toString());
 
+        System.out.println("\n################################################################################\n");
+
+        System.out.println("GET: '/documents?token='");
+        Response<SearchResponseDto> searchResponseEmptyToken = client.getDocumentsByTokens().execute();
+        System.out.println("Response Code: " + searchResponseEmptyToken.code());
+        System.out.println("Content: " + searchResponseEmptyToken.errorBody().string());
+
         System.out.println("\n#################### END OF DEMO #################################\n");
     }
 

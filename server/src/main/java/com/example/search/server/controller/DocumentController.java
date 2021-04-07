@@ -6,6 +6,7 @@ import com.example.search.api.SearchResponseDto;
 import com.example.search.server.service.DocumentService;
 import java.util.Set;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class DocumentController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public SearchResponseDto getDocumentsByTokens(@RequestParam(value = "token") Set<String> tokens) {
+    public SearchResponseDto getDocumentsByTokens(@NotNull @RequestParam(value = "token") Set<String> tokens) {
         return new SearchResponseDto(documentService.findDocumentsContainingAllTokens(tokens));
     }
 

@@ -108,4 +108,12 @@ class DocumentControllerTest {
                         .value(containsInAnyOrder("Key1", "Key2")));
     }
 
+    @Test
+    void shouldRespondWithBadRequestOnMissingRequestParameter() throws Exception {
+        mockMvc.perform(get("/documents"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Missing request param: token"));
+    }
+
 }
